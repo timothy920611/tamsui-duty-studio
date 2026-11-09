@@ -12,3 +12,14 @@ export function displayName(s,reverse=true){const p=s.trim().split(/\s+/);return
 export const months=rows=>[...new Set(rows.map(r=>r.month))].sort();
 export const people=rows=>[...new Set(rows.map(r=>r.person))].sort((a,b)=>a.localeCompare(b,'zh-Hant'));
 export const monthLabel=m=>`${Number(m.slice(0,4))}年${Number(m.slice(5))}月`;
+
+export const MIDWEEK_NORMAL_DAY=4; // 週中聚會的正常日子：星期四；其他星期標為特殊日期
+export function meetingSections(rows,size=5){
+ const groups=[{key:'mid',label:'週中聚會',normal:MIDWEEK_NORMAL_DAY,test:d=>d>=1&&d<=5},{key:'weekend',label:'週末聚會',normal:null,test:d=>d===0||d===6}];
+ const out=[];
+ for(const g of groups){
+  const dates=[...new Map(rows.filter(r=>g.test(r.day)).map(r=>[r.date,r.day]))].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,day])=>({date,day,special:g.normal!==null&&day!==g.normal}));
+  for(let i=0;i<dates.length;i+=size)out.push({key:g.key,label:g.label,dates:dates.slice(i,i+size)});
+ }
+ return out;
+}
